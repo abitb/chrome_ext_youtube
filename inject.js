@@ -1,41 +1,51 @@
 //var url = (window.location != windowparent.location) ? document.referrer: document.location;
-var currentUrl = window.location.href; 
-var player = document.getElementById('movie_player');
-var playbackQuality, playbackRate, playerState, currentTime, currentLoadedFraction;
-var videoUrl;
+// var currentUrl = window.location.href; 
+var player, videoUrl, videoDuration, realTime, mcs_timer, mcs_timeout, pause_timer;
+var playerState, playbackQuality, playbackRate, currentTime, currentLoadedFraction;
+
+player = document.getElementById('movie_player');
 
 if (!player) {
-	setTimeout(function(){ 
+	var getPlayer_timer = setInterval( function(){
 		player = document.getElementById('movie_player');
-		alert("getting player again");
-		init();
-		logOnce();}, 500); //TODO: after dom load
-} else {
-	init();
+		if (!!player) {
+			console.log(player);
+			clearInterval(getPlayer_timer);
+			var onHasPlayer = new Event('onHasPlayer');
+			document.dispatchEvent(onHasPlayer);
+		}
+	},100);
+} else { 
+	console.log(player);
+	add_handles(); }
+
+document.addEventListener('onHasPlayer', function () { add_handles(); }, false);
+
+function init () {	
+	logOnce();
+	resetTimer();
 }
 
-function init () {
+function add_handles () {
 	player.addEventListener("onStateChange", "state_handle");
 	player.addEventListener("onPlaybackQualityChange", "playbackQuality_handle");
 	player.addEventListener("onPlaybackRateChange", "playbackRate_handle");
 	player.addEventListener("onError", "error_handle");
-	
-	playbackQuality = player.getPlaybackQuality();
-	playbackRate = player.getPlaybackRate();
 }
 
-function logOnce() {
-	var videoDuration, volume, availableQualities, availableRates, playList;
-	videoUrl = player.getVideoUrl();
+function logOnce () {
+	realTime = Date.now();
+
+	videoUrl = window.location.href;
 	videoDuration = player.getDuration();
-	volume = player.getVolume();
-	availableQualities = player.getAvailableQualityLevels().toString();
-	availableRates = player.getAvailablePlaybackRates().toString();
-	//TODO: playlistindex could change in same window
-	playList = player.getPlaylistIndex();
+	
+	var volume = player.getVolume();
+	var availableQualities = player.getAvailableQualityLevels().toString();
+	var availableRates = player.getAvailablePlaybackRates().toString();
+	var playList = player.getPlaylistIndex();
 	
 	window.postMessage({
-		from: "FROM_INJECTED_PAGE_0", 
+		from: "FROM_INJECTED_ONCE", 
 		url:videoUrl,
 		videoDur:videoDuration,
 		vol:volume,
@@ -43,26 +53,9 @@ function logOnce() {
 		availableR:availableRates,
 		lenPlayList:playList
 	}, "*"); 
-}
 
-var timer = function() {
-	setInterval(messageContentScript, 10000);
-}
-
-function state_handle() {
 	playerState = player.getPlayerState();
-	if (playerState == 0) { clearInterval(timer); console.log("timer"); };
-	//TODO: where to put logOnce
-	if (playerState == -1) { timer(); logOnce(); console.log("restart timer"); };
-	messageContentScript();
-}
-
-function playbackQuality_handle() {
 	playbackQuality = player.getPlaybackQuality();
-	messageContentScript();
-}
-
-function playbackRate_handle() {
 	playbackRate = player.getPlaybackRate();
 	messageContentScript();
 }
@@ -72,7 +65,7 @@ function messageContentScript () {
 	currentLoadedFraction = player.getVideoLoadedFraction();
 	
 	window.postMessage({
-		from: "FROM_INJECTED_PAGE", 
+		from: "FROM_INJECTED_REPEAT", 
 		playS:playerState,
 		cTime:currentTime,
 		load:currentLoadedFraction,
@@ -82,4 +75,47 @@ function messageContentScript () {
 	}, "*"); 
 }
 
-// console.log(currentUrl); 
+function resetTimer () {
+	clearTimer();
+	mcs_timer = setInterval(messageContentScript, 200);
+	mcs_timeout = setTimeout(function () {
+		clearInterval(mcs_timer);
+		mcs_timer = setInterval(messageContentScript, 2000);
+		console.log("resetTimer!");
+	}, 1000*20);
+}
+
+function clearTimer () {
+	if (mcs_timer) { clearInterval(mcs_timer); };
+	if (mcs_timeout) { clearTimeout(mcs_timeout); };
+}
+
+function state_handle () {
+	playerState = player.getPlayerState();
+	if (playerState == -1) {
+		init();
+		return;
+	};
+
+	if (pause_timer) { clearTimeout(pause_timer); pause_timer = undefined; };
+	if (playerState == 2){ pause_timer = setTimeout( function(){ clearTimer(); }, Math.round(videoDuration/1.2) ); }
+
+	if (playerState == 0) { clearTimer(); console.log("videoEnd"); };
+	if (playerState == 1) {
+		if (videoUrl != window.location.href){ init(); };
+	};
+	if (playerState == 3) { resetTimer(); };
+
+	messageContentScript();
+	
+}
+
+function playbackQuality_handle () {
+	playbackQuality = player.getPlaybackQuality();
+	messageContentScript();
+}
+
+function playbackRate_handle () {
+	playbackRate = player.getPlaybackRate();
+	messageContentScript();
+}

@@ -4,9 +4,9 @@ chrome.runtime.onConnect.addListener(function(port){
 		if(!db) return;
 		db.transaction(
 			function(t) {
-				if (msg.from == "FROM_INJECTED_PAGE") {
-					t.executeSql(" INSERT INTO youtubeLog ( timestamp, playerState, currentTime, currentLoadedFraction, playbackQuality, playbackRate, url ) VALUES ( STRFTIME('%s%f', 'now'), ?, ?, ?, ?, ?, ? ) ", [ msg.playS , msg.cTime, msg.load, msg.playQ, msg.playR, msg.url]);
-				} else if (msg.from == "FROM_INJECTED_PAGE_0"){
+				if (msg.from == "FROM_INJECTED_REPEAT") {
+					t.executeSql(" INSERT INTO youtubeLog ( timestamp, playerState, currentTime, currentLoadedFraction, playbackQuality, playbackRate, url ) VALUES ( STRFTIME('%s%f', 'now', 'localtime'), ?, ?, ?, ?, ?, ? ) ", [ msg.playS , msg.cTime, msg.load, msg.playQ, msg.playR, msg.url]);
+				} else if (msg.from == "FROM_INJECTED_ONCE"){
 					// alert("executeSql");
 					t.executeSql(' INSERT INTO youtube ( url, duration, volume, availableQ, availableR, playListIndex ) VALUES ( ?, ?, ?, ?, ?, ? ) ', [ msg.url , msg.videoDur, msg.vol, msg.availableQ, msg.availableR, msg.playList]);
 				}
