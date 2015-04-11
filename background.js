@@ -5,14 +5,14 @@ chrome.runtime.onConnect.addListener(function(port){
 		db.transaction(
 			function(t) {
 				if (msg.from == "FROM_INJECTED_REPEAT") {
-					t.executeSql(" INSERT INTO youtubeLog ( timestamp, playerState, currentTime, currentLoadedFraction, playbackQuality, playbackRate, url ) VALUES ( STRFTIME('%s%f', 'now', 'localtime'), ?, ?, ?, ?, ?, ? ) ", [ msg.playS , msg.cTime, msg.load, msg.playQ, msg.playR, msg.url]);
+					t.executeSql(" INSERT INTO youtubeLog ( timestamp, playerState, currentTime, currentLoadedFraction, playbackQuality, playbackRate, url ) VALUES (CAST(strftime('%s','now') || '.' || substr(strftime('%f','now'),4,3) AS REAL), ?, ?, ?, ?, ?, ? ) ", [ msg.playS , msg.cTime, msg.load, msg.playQ, msg.playR, msg.url]);
 				} else if (msg.from == "FROM_INJECTED_ONCE"){
 					// alert("executeSql");
 					t.executeSql(' INSERT INTO youtube ( url, duration, volume, availableQ, availableR, playListIndex ) VALUES ( ?, ?, ?, ?, ?, ? ) ', [ msg.url , msg.videoDur, msg.vol, msg.availableQ, msg.availableR, msg.playList]);
 				}
 			},
 			function(t, e) {
-				alert('Insert row: ' + e.message); } //error callback
+				console.log('Insert row: ' + e.message); } //error callback
         );// end of db.transaction
 	}); // end of onMessage.addListener
 }); //end of runtime.onConnect.addListener
