@@ -1,6 +1,6 @@
 //var url = (window.location != windowparent.location) ? document.referrer: document.location;
 // var currentUrl = window.location.href; 
-var player, videoUrl, videoDuration, realTime, mcs_timer, mcs_timeout, pause_timer;
+var player, videoUrl, videoDuration, realTime, mcs_timer, mcs_timeout, pause_timeOut;
 var playerState, playbackQuality, playbackRate, currentTime, currentLoadedFraction;
 
 player = document.getElementById('movie_player');
@@ -9,21 +9,24 @@ if (!player) {
 	var getPlayer_timer = setInterval( function(){
 		player = document.getElementById('movie_player');
 		if (!!player) {
-			console.log(player);
+			console.log("player");
 			clearInterval(getPlayer_timer);
 			var onHasPlayer = new Event('onHasPlayer');
 			document.dispatchEvent(onHasPlayer);
 		}
 	},100);
 } else { 
-	console.log(player);
+	console.log("player");
 	add_handles(); }
 
 document.addEventListener('onHasPlayer', function () { add_handles(); }, false);
 
-function init () {	
-	logOnce();
-	resetTimer();
+function init () {
+  if (player.getVideoUrl()==window.location.href) {
+  	logOnce();
+  	resetTimer();
+  	console.log("yes video!");
+  };	
 }
 
 function add_handles () {
@@ -92,22 +95,17 @@ function clearTimer () {
 
 function state_handle () {
 	playerState = player.getPlayerState();
-	if (playerState == -1) {
-		init();
-		return;
-	};
+	if (playerState == -1) { init(); console.log("-1"); return; };
 
-	if (pause_timer) { clearTimeout(pause_timer); pause_timer = undefined; };
-	if (playerState == 2){ pause_timer = setTimeout( function(){ clearTimer(); }, Math.round(videoDuration/1.2) ); }
+	if (pause_timeOut) { clearTimeout(pause_timeOut); pause_timeOut = undefined; };
+	if (playerState == 2){ pause_timeOut = setTimeout( function(){ clearTimer(); }, Math.round(videoDuration/1.2) ); return; }
 
-	if (playerState == 0) { clearTimer(); console.log("videoEnd"); };
+	if (playerState == 0) { clearTimer(); console.log("videoEnd"); return; };
 	if (playerState == 1) {
-		if (videoUrl != window.location.href){ init(); };
+		if (videoUrl != window.location.href){ init(); console.log("changevid"); return; };
 	};
-	if (playerState == 3) { resetTimer(); };
-
+	if (playerState == 3) { resetTimer(); return; };
 	messageContentScript();
-	
 }
 
 function playbackQuality_handle () {

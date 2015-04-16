@@ -4,11 +4,12 @@ chrome.runtime.onConnect.addListener(function(port){
 		if(!db) return;
 		db.transaction(
 			function(t) {
+			  timestampQuery = "CAST(strftime('%s','now') || '.' || substr(strftime('%f','now'),4,3) AS REAL)";
 				if (msg.from == "FROM_INJECTED_REPEAT") {
-					t.executeSql(" INSERT INTO youtubeLog ( timestamp, playerState, currentTime, currentLoadedFraction, playbackQuality, playbackRate, url ) VALUES (CAST(strftime('%s','now') || '.' || substr(strftime('%f','now'),4,3) AS REAL), ?, ?, ?, ?, ?, ? ) ", [ msg.playS , msg.cTime, msg.load, msg.playQ, msg.playR, msg.url]);
+					t.executeSql(" INSERT INTO youtubeLog ( timestamp, playerState, currentTime, currentLoadedFraction, playbackQuality, playbackRate, url ) VALUES (" + timestampQuery +  ", ?, ?, ?, ?, ?, ? ) ", [ msg.playS , msg.cTime, msg.load, msg.playQ, msg.playR, msg.url]);
 				} else if (msg.from == "FROM_INJECTED_ONCE"){
 					// alert("executeSql");
-					t.executeSql(' INSERT INTO youtube ( url, duration, volume, availableQ, availableR, playListIndex ) VALUES ( ?, ?, ?, ?, ?, ? ) ', [ msg.url , msg.videoDur, msg.vol, msg.availableQ, msg.availableR, msg.playList]);
+					t.executeSql(" INSERT INTO youtube ( url, duration, volume, availableQ, availableR, playListIndex, timestamp ) VALUES ( ?, ?, ?, ?, ?, ?," + timestampQuery +" ) ", [ msg.url , msg.videoDur, msg.vol, msg.availableQ, msg.availableR, msg.playList]);
 				}
 			},
 			function(t, e) {
@@ -25,13 +26,14 @@ var createVideoSQL = 'CREATE TABLE IF NOT EXISTS youtube (' +
     'volume INTEGER,' +
     'availableQ TEXT,' +
     'availableR TEXT,' +
-    'playListIndex INTEGER' +
+    'playListIndex INTEGER,' +
+    'timestamp REAL' +
     ')';
 
 var createLogSQL = 'CREATE TABLE IF NOT EXISTS youtubeLog (' +
 	'id INTEGER PRIMARY KEY,' +
-	'timestamp INTEGER,' +
-	'playerState TEXT,' +
+	'timestamp REAL,' +
+	'playerState INTEGER,' +
 	'currentTime REAL,' +
 	'currentLoadedFraction REAL,'+
 	'playbackQuality TEXT,' +
@@ -46,7 +48,7 @@ function prepareDatabase() {
 		alert('Web SQL Not Supported');
 		return undefined;
 	} else {
-		var db = odb( 'testDatabase', '1.0', 'A Test Database', 10 * 1024 * 1024 );
+		var db = odb( 'testDatabase', '1.0', 'A Test Database', 10 * 1024 * 1024 ); //change db size here
 		db.transaction(function (t) {
 			t.executeSql( createVideoSQL, [], function(t, s){}, function(t, e) {
 				alert('create table: ' + e.message);
