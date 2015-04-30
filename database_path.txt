@@ -1,6 +1,47 @@
 C:\Users\Fei\AppData\Local\Google\Chrome\User Data\Default\databases
+
+select Distinct(url), videoID from youtube
+
+SELECT datetime(timestamp/100, 'unixepoch', 'localtime') FROM youtubeLog;
+SELECT datetime(strftime('%s%f','now')/100,'unixepoch', 'localtime');
+SELECT datetime(strftime('%s','now') || '.' || substr(strftime('%f','now'),4,3),'unixepoch', 'localtime')
+
 drop table youtube;
 drop table youtubeLog;
+
+q1(distinct video duration)
+SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url
+
+q2(start time stamp)
+SELECT timestamp FROM (q1), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = () AND (playerState = -1.0 OR playerState = 1.0) ORDER BY timestamp LIMIT 1
+
+full q2
+SELECT timestamp FROM (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = () AND (playerState = -1.0 OR playerState = 1.0) ORDER BY timestamp LIMIT 1
+
+query
+SELECT duration, timestamp-(q2) AS seconds, currentTime, currentLoadedFraction*duration AS currentLoadedTime, (currentLoadedFraction*duration- currentTime) AS timeDiff, playerState, youtubeLog.url FROM (q1), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = () ORDER BY timestamp;
+
+SELECT duration, timestamp-(SELECT timestamp FROM (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = () AND (playerState = -1.0 OR playerState = 1.0) ORDER BY timestamp LIMIT 1) AS seconds, currentTime, currentLoadedFraction*duration AS currentLoadedTime, (currentLoadedFraction*duration- currentTime) AS timeDiff, playerState, youtubeLog.url FROM (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = () ORDER BY timestamp;
+
+
+-1��δ��ʼ��
+0���ѽ�����
+1�����ڲ��ţ�
+2������ͣ��
+3�����ڻ��壩
+5����Ƶ�Ѳ��룩
+
+
+
+SELECT timestamp-(SELECT timestamp FROM youtubeLog asc limit 1) FROM youtubeLog
+
+142627631858.217
+SELECT strftime('%Y-%m-%d %H:%M:%f','now');
+
+
+
+
+
 
 SELECT duration, timestamp, currentTime, currentLoadedFraction*duration AS currentLoadedFraction, currentLoadedFraction*duration- currentTime AS timeDiff, youtubeLog.url FROM (SELECT MAX(duration) AS duration, url AS yt_url FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND playerState = 1.0 ORDER BY timestamp;
 
@@ -13,8 +54,6 @@ datetime(timestamp/100, 'unixepoch')
 // 	return;
 // }
 
-
-SELECT timestamp FROM youtubeLog where 
 
 SELECT timestamp FROM (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = 1 AND playerState = 1.0 ORDER BY timestamp LIMIT 1;
 
@@ -29,4 +68,6 @@ SELECT timestamp, playerState FROM (SELECT MAX(duration) AS duration, url AS yt_
 SELECT timestamp-(SELECT timestamp FROM (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND videoID =2 AND (playerState = -1.0 OR playerState = 1.0) ORDER BY timestamp LIMIT 1) AS ts FROM youtubeLog;
 
 # use videoID
-SELECT duration, timestamp-(SELECT timestamp FROM (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = 2 AND (playerState = -1.0 OR playerState = 1.0) ORDER BY timestamp LIMIT 1) AS seconds, currentTime, currentLoadedFraction*duration AS currentLoadedFraction, currentLoadedFraction*duration- currentTime AS timeDiff, playerState, youtubeLog.url FROM (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = 2 ORDER BY timestamp;
+SELECT duration, timestamp-(SELECT timestamp FROM (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = 125 AND (playerState = -1.0 OR playerState = 1.0) ORDER BY timestamp LIMIT 1) AS seconds, currentTime, currentLoadedFraction*duration AS currentLoadedFraction, currentLoadedFraction*duration- currentTime AS timeDiff, playerState, youtubeLog.url FROM (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog WHERE yt_url = youtubeLog.url AND videoID = 125 ORDER BY timestamp;
+
+select * from (SELECT MAX(duration) AS duration, url AS yt_url, videoID FROM youtube GROUP BY yt_url), youtubeLog where yt_url=youtubeLog.url AND videoID = 2

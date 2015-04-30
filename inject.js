@@ -81,16 +81,10 @@ function messageContentScript () {
 function resetTimer () {
 	clearTimer();
 	mcs_timer = setInterval(messageContentScript, 200);
-	mcs_timeout = setTimeout(function () {
-		clearInterval(mcs_timer);
-		mcs_timer = setInterval(messageContentScript, 2000);
-		console.log("resetTimer!");
-	}, 1000*20);
 }
 
 function clearTimer () {
 	if (mcs_timer) { clearInterval(mcs_timer); };
-	if (mcs_timeout) { clearTimeout(mcs_timeout); };
 }
 
 function state_handle () {
@@ -104,7 +98,6 @@ function state_handle () {
 	if (playerState == 1) {
 		if (videoUrl != window.location.href){ init(); console.log("changevid"); return; };
 	};
-	if (playerState == 3) { resetTimer(); return; };
 	messageContentScript();
 }
 
