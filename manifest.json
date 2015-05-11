@@ -11,5 +11,5 @@
         "js" : ["content_script.js"]
     }],
     "web_accessible_resources": ["inject.js"] ,
-    "permissions": ["unlimitedStorage","http://www.google.com/"]
+    "permissions": ["unlimitedStorage","http://128.255.45.160/"]
 }
