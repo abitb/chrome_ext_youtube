@@ -1,15 +1,21 @@
 {
-	"manifest_version": 2,
-	"name": "Youtube Quality",
-	"version": "0.1",
-	"description": "",
-	"background": {
-		"scripts": ["background.js"]
-	},
-	"content_scripts" : [{
-        "matches": ["http://www.youtube.com/*", "https://www.youtube.com/*"],
-        "js" : ["content_script.js"]
-    }],
-    "web_accessible_resources": ["inject.js"] ,
-    "permissions": ["unlimitedStorage","http://128.255.45.160/"]
+  "manifest_version": 2,
+  "name": "Youtube Quality",
+  "version": "0.1",
+  "description": "",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://www.youtube.com/*", "https://www.youtube.com/*"],
+      "js": ["content_script.js"]
+    }
+  ],
+  "web_accessible_resources": ["inject.js","popup.js"] ,
+  "permissions": ["http://128.255.45.160"],  //to allow cross site Ajax to server
+  "browser_action": {
+    "default_title": "Youtube Monitor",
+    "default_popup": "popup.html"
+  }
 }
