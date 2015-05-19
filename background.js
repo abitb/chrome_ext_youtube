@@ -1,14 +1,19 @@
 chrome.runtime.onConnect.addListener(function(port) {
   console.assert(port.name == "FROM_CONTENT_SCRIPT");
   port.onMessage.addListener(function(msg) {
-  // create new xhr object each time to send message
-  // by appending query string in ajax POST
+    // create new xhr object each time to send message
+    // by appending query string in ajax POST
     postDataToServer(getRequestBody(msg));
   });
 });
 
-var url = "http://128.255.45.160/ajax.php";
+// the server domain name should be the same as manifest-> permissions
+var url = "http://localhost/ajax.php";
+chrome.storage.sync.set({
+  'timer' : 200
+});
 
+// build query string that gets appended to post request
 function getRequestBody(msg) {
   var pieces = [];
   for (var key in msg) {
