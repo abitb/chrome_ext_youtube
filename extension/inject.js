@@ -66,7 +66,7 @@ function init() {
   var urlFromYtAPI = ytExtPlayer.getVideoUrl();
   var urlFromNavbar = window.location.href;
   if (regex.test(urlFromNavbar)) {
-    if (urlFromYtAPI.replace(regex, "") == window.location.href.replace(regex, "")) {
+    if (urlFromYtAPI.replace(regex, "") == urlFromNavbar.replace(regex, "")) {
 
       logOnce();
       resetTimer();
