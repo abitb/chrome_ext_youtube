@@ -8,7 +8,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 });
 
 // the server domain name should be the same as manifest-> permissions
-var url = "http://localhost/ajax.php";
+var url = "http://128.255.44.227/ajax.php";
 chrome.storage.sync.set({
   'timer' : 200
 });
