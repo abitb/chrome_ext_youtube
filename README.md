@@ -2,10 +2,11 @@
 log youtube traffic data
 
 ## Packaging Instruction:
-package all content under extension/ into a .crx file, [instruction](https://developer.chrome.com/extensions/packaging)
 change the testing url to the production url in:
 - extension/manifest.json under "permissions"
 - extension/background.js
+
+package all content under extension/ into a .crx file, [instruction](https://developer.chrome.com/extensions/packaging)
 
 ## What's in server/
 - ajax.php:  the server file that listens to the incoming post requests
